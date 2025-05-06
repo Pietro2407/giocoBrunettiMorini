@@ -1,5 +1,6 @@
 package giocoBrunettiMorini;
 
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -10,6 +11,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Labirinto extends Application {
     private static final int CELL_SIZE = 20;
@@ -21,10 +23,11 @@ public class Labirinto extends Application {
     private int xGiocatore = 1;
     private int yGiocatore = 1;
 
-    private int xArrivo = 8;
-    private int yArrivo = 8;
+    private int xArrivo = 28;
+    private int yArrivo = 25;
 
-    private Timeline timer;
+    
+
     private int tempoRimasto = TIME_LIMIT;
     private Text tempo;
 
@@ -55,16 +58,24 @@ public class Labirinto extends Application {
         {1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1},
         {1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1},
         {1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1},
-        {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1}
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
     @Override
     public void start(Stage stage) {
         Pane pannello = new Pane();
-        // Aumentato a +60 pixel per includere completamente il testo
+        
+       
         Scene scene = new Scene(pannello, WIDTH * CELL_SIZE, HEIGHT * CELL_SIZE + 60);
+        
+        Timeline timeline = new Timeline(new KeyFrame(
+      	      Duration.seconds(1), // ogni quanto va chiamata la funzione
+      	      x -> aggiornaTimer()));
+      	    timeline.setCycleCount(100);
+      	    timeline.play();
+      
 
-        tempo = new Text("Tempo: " + tempoRimasto);
+        tempo = new Text("Tempo rimasto: " + tempoRimasto);
         tempo.setFont(Font.font(20));
         tempo.setY(HEIGHT * CELL_SIZE + 30);
         pannello.getChildren().add(tempo);
@@ -95,6 +106,8 @@ public class Labirinto extends Application {
         });
 
         pannello.getChildren().add(giocatore);
+        
+       
 
         stage.setScene(scene);
         stage.setTitle("Labirinto");
@@ -127,6 +140,19 @@ public class Labirinto extends Application {
             tempo.setText("Hai vinto!");
         }
     }
+    private void aggiornaTimer(){
+    	if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
+    		tempo.setText("Hai vinto!");
+    	}else if(Integer.parseInt(tempoRimasto+"")==0) {
+    		tempo.setText("Hai perso");
+    	}else {
+    		tempo.setText("Tempo rimasto: "+ (tempoRimasto--));
+    	}
+
+
+    }
+
+
 
     public static void main(String[] args) {
         launch(args);
