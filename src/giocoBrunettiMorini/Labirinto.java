@@ -8,8 +8,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -19,20 +17,13 @@ public class Labirinto extends Application {
     private static final int CELL_SIZE = 32;
     private static final int WIDTH = 30;
     private static final int HEIGHT = 27;
-    private static final int TIME_LIMIT = 30; // secondi 
+    private static final int TIME_LIMIT = 30;
 
-
-
-
-
-    private Rectangle giocatore;
+    private ImageView giocatore;
     private int xGiocatore = 1;
     private int yGiocatore = 1;
-
     private int xArrivo = 28;
     private int yArrivo = 25;
-
-    
 
     private int tempoRimasto = TIME_LIMIT;
     private Text tempo;
@@ -70,16 +61,11 @@ public class Labirinto extends Application {
     @Override
     public void start(Stage stage) {
         Pane pannello = new Pane();
-        
-       
         Scene scene = new Scene(pannello, WIDTH * CELL_SIZE, HEIGHT * CELL_SIZE + 60);
-        
-        Timeline timeline = new Timeline(new KeyFrame(
-      	      Duration.seconds(1), // ogni quanto va chiamata la funzione
-      	      x -> aggiornaTimer()));
-      	    timeline.setCycleCount(100);
-      	    timeline.play();
-      
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), x -> aggiornaTimer()));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
 
         tempo = new Text("Tempo rimasto: " + tempoRimasto);
         tempo.setFont(Font.font(20));
@@ -88,39 +74,58 @@ public class Labirinto extends Application {
 
         caricaLabirinto(pannello);
 
-        //giocatore = new Rectangle(CELL_SIZE, CELL_SIZE, Color.BLUE);
-        //giocatore.setX(xGiocatore * CELL_SIZE);
-        //giocatore.setY(yGiocatore * CELL_SIZE);
+        Image imgGiocatore = new Image(getClass().getResourceAsStream("immagini/tile6.png"));
+        giocatore = new ImageView(imgGiocatore);
+        giocatore.setFitWidth(CELL_SIZE);
+        giocatore.setFitHeight(CELL_SIZE);
+        giocatore.setX(xGiocatore * CELL_SIZE);
+        giocatore.setY(yGiocatore * CELL_SIZE);
+        pannello.getChildren().add(giocatore);
+
+
+        final String[] direzione = {"giu"};
 
         scene.setOnKeyPressed(e -> {
-        	int dx = 0, dy = 0;
-        	if (e.getCode() == KeyCode.UP){ 
-        		dy = -1;
-        		Image fotoSu = new Image(getClass().getResourceAsStream("giocatore/tile0.png"));
-            	ImageView su=new ImageView(fotoSu);
-            	su.setImage(fotoSu);
-            	su.setX(xGiocatore * CELL_SIZE);
-            	su.setY(yGiocatore * CELL_SIZE);
-            	
-        	}else if (e.getCode() == KeyCode.DOWN) dy = 1;
-            else if (e.getCode() == KeyCode.LEFT) dx = -1;
-            else if (e.getCode() == KeyCode.RIGHT) dx = 1;
+            int dx = 0, dy = 0;
+
+            if (e.getCode() == KeyCode.UP) {
+                dy = -1;
+                direzione[0] = "su";
+            } else if (e.getCode() == KeyCode.DOWN) {
+                dy = 1;
+                direzione[0] = "giu";
+            } else if (e.getCode() == KeyCode.LEFT) {
+                dx = -1;
+                direzione[0] = "sinistra";
+            } else if (e.getCode() == KeyCode.RIGHT) {
+                dx = 1;
+                direzione[0] = "destra";
+            }
 
             int newX = xGiocatore + dx;
             int newY = yGiocatore + dy;
 
-            if (labirinto[newY][newX] == 0) {
+            if (newX >= 0 && newX < WIDTH && newY >= 0 && newY < HEIGHT && labirinto[newY][newX] == 0) {
                 xGiocatore = newX;
                 yGiocatore = newY;
                 giocatore.setX(xGiocatore * CELL_SIZE);
                 giocatore.setY(yGiocatore * CELL_SIZE);
-                vittoria(stage);
+
+
+                int indicatore = switch (direzione[0]) {
+                    case "destra" -> 6;
+                    case "sinistra" -> 2;
+                    case "su" -> 0;
+                    case "giu" -> 4;
+                    default -> 6;
+                };
+                String nomeImmagine = "tile" + (indicatore) + ".png";
+                Image nuovaImg = new Image(getClass().getResourceAsStream("immagini/" + nomeImmagine));
+                giocatore.setImage(nuovaImg);
+
+                vittoria();
             }
         });
-
-        pannello.getChildren().add(giocatore);
-        
-       
 
         stage.setScene(scene);
         stage.setTitle("Labirinto");
@@ -130,54 +135,44 @@ public class Labirinto extends Application {
     private void caricaLabirinto(Pane root) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                
                 if (labirinto[y][x] == 1) {
-                	
-                	Image fotoPavimento = new Image(getClass().getResourceAsStream("mappa/pavimento.png"));
-                	ImageView pavimento=new ImageView(fotoPavimento);
-                	pavimento.setX(x*CELL_SIZE-1);
-                	pavimento.setY(y*CELL_SIZE-1);
-                	root.getChildren().add(pavimento);
+                    Image fotoPavimento = new Image(getClass().getResourceAsStream("immagini/pavimento.png"));
+                    ImageView pavimento = new ImageView(fotoPavimento);
+                    pavimento.setX(x * CELL_SIZE);
+                    pavimento.setY(y * CELL_SIZE);
+                    root.getChildren().add(pavimento);
                 } else {
-                	 
-                	Image fotoMuro = new Image(getClass().getResourceAsStream("mappa/muro.png"));
-                	ImageView muro=new ImageView(fotoMuro);
-                	muro.setX(x*CELL_SIZE-1);
-                	muro.setY(y*CELL_SIZE-1);
-                	root.getChildren().add(muro);
-                	
+                    Image fotoMuro = new Image(getClass().getResourceAsStream("immagini/muro.png"));
+                    ImageView muro = new ImageView(fotoMuro);
+                    muro.setX(x * CELL_SIZE);
+                    muro.setY(y * CELL_SIZE);
+                    root.getChildren().add(muro);
                 }
             }
         }
 
-        Image fotoarrivo = new Image(getClass().getResourceAsStream("mappa/arrivo.png"));
-    	ImageView arrivo=new ImageView(fotoarrivo);
-    	arrivo.setX(xArrivo * CELL_SIZE);
-    	arrivo.setY(yArrivo * CELL_SIZE);
-    	root.getChildren().add(arrivo);
-
-        
-   
+        Image fotoarrivo = new Image(getClass().getResourceAsStream("immagini/arrivo.png"));
+        ImageView arrivo = new ImageView(fotoarrivo);
+        arrivo.setX(xArrivo * CELL_SIZE);
+        arrivo.setY(yArrivo * CELL_SIZE);
+        root.getChildren().add(arrivo);
     }
 
-    private void vittoria(Stage stage) {
+    private void vittoria() {
         if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
             tempo.setText("Hai vinto!");
         }
     }
-    private void aggiornaTimer(){
-    	if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
-    		tempo.setText("Hai vinto!");
-    	}else if(Integer.parseInt(tempoRimasto+"")==0) {
-    		tempo.setText("Hai perso");
-    	}else {
-    		tempo.setText("Tempo rimasto: "+ (tempoRimasto--));
-    	}
 
+    private void aggiornaTimer() {
+        if (xGiocatore == xArrivo && yGiocatore == yArrivo) return;
 
+        if (tempoRimasto <= 0) {
+            tempo.setText("Hai perso");
+        } else {
+            tempo.setText("Tempo rimasto: " + (--tempoRimasto));
+        }
     }
-
-
 
     public static void main(String[] args) {
         launch(args);
