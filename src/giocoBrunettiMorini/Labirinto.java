@@ -4,6 +4,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -14,10 +16,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class Labirinto extends Application {
-    private static final int CELL_SIZE = 20;
+    private static final int CELL_SIZE = 32;
     private static final int WIDTH = 30;
     private static final int HEIGHT = 27;
     private static final int TIME_LIMIT = 30; // secondi 
+
+
+
+
 
     private Rectangle giocatore;
     private int xGiocatore = 1;
@@ -82,14 +88,21 @@ public class Labirinto extends Application {
 
         caricaLabirinto(pannello);
 
-        giocatore = new Rectangle(CELL_SIZE, CELL_SIZE, Color.BLUE);
-        giocatore.setX(xGiocatore * CELL_SIZE);
-        giocatore.setY(yGiocatore * CELL_SIZE);
+        //giocatore = new Rectangle(CELL_SIZE, CELL_SIZE, Color.BLUE);
+        //giocatore.setX(xGiocatore * CELL_SIZE);
+        //giocatore.setY(yGiocatore * CELL_SIZE);
 
         scene.setOnKeyPressed(e -> {
-            int dx = 0, dy = 0;
-            if (e.getCode() == KeyCode.UP) dy = -1;
-            else if (e.getCode() == KeyCode.DOWN) dy = 1;
+        	int dx = 0, dy = 0;
+        	if (e.getCode() == KeyCode.UP){ 
+        		dy = -1;
+        		Image fotoSu = new Image(getClass().getResourceAsStream("giocatore/tile0.png"));
+            	ImageView su=new ImageView(fotoSu);
+            	su.setImage(fotoSu);
+            	su.setX(xGiocatore * CELL_SIZE);
+            	su.setY(yGiocatore * CELL_SIZE);
+            	
+        	}else if (e.getCode() == KeyCode.DOWN) dy = 1;
             else if (e.getCode() == KeyCode.LEFT) dx = -1;
             else if (e.getCode() == KeyCode.RIGHT) dx = 1;
 
@@ -117,22 +130,34 @@ public class Labirinto extends Application {
     private void caricaLabirinto(Pane root) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                Rectangle casella = new Rectangle(CELL_SIZE, CELL_SIZE);
-                casella.setX(x * CELL_SIZE);
-                casella.setY(y * CELL_SIZE);
+                
                 if (labirinto[y][x] == 1) {
-                    casella.setFill(Color.BLACK);
+                	
+                	Image fotoPavimento = new Image(getClass().getResourceAsStream("mappa/pavimento.png"));
+                	ImageView pavimento=new ImageView(fotoPavimento);
+                	pavimento.setX(x*CELL_SIZE-1);
+                	pavimento.setY(y*CELL_SIZE-1);
+                	root.getChildren().add(pavimento);
                 } else {
-                    casella.setFill(Color.WHITE);
+                	 
+                	Image fotoMuro = new Image(getClass().getResourceAsStream("mappa/muro.png"));
+                	ImageView muro=new ImageView(fotoMuro);
+                	muro.setX(x*CELL_SIZE-1);
+                	muro.setY(y*CELL_SIZE-1);
+                	root.getChildren().add(muro);
+                	
                 }
-                root.getChildren().add(casella);
             }
         }
 
-        Rectangle arrivo = new Rectangle(CELL_SIZE, CELL_SIZE, Color.GREEN);
-        arrivo.setX(xArrivo * CELL_SIZE);
-        arrivo.setY(yArrivo * CELL_SIZE);
-        root.getChildren().add(arrivo);
+        Image fotoarrivo = new Image(getClass().getResourceAsStream("mappa/arrivo.png"));
+    	ImageView arrivo=new ImageView(fotoarrivo);
+    	arrivo.setX(xArrivo * CELL_SIZE);
+    	arrivo.setY(yArrivo * CELL_SIZE);
+    	root.getChildren().add(arrivo);
+
+        
+   
     }
 
     private void vittoria(Stage stage) {
