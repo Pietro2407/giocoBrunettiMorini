@@ -24,6 +24,8 @@ public class Labirinto extends Application {
     private int yGiocatore = 1;
     private int xArrivo = 28;
     private int yArrivo = 25;
+    private ImageView immagineFinale;
+
 
     private int tempoRimasto = TIME_LIMIT;
     private Text tempo;
@@ -160,19 +162,35 @@ public class Labirinto extends Application {
 
     private void vittoria() {
         if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
-            tempo.setText("Hai vinto!");
+            mostraImmagineFinale("immagini/hai_vinto.png");
         }
     }
 
     private void aggiornaTimer() {
-        if (xGiocatore == xArrivo && yGiocatore == yArrivo) return;
-
+        if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
+        	return;
+        }
         if (tempoRimasto <= 0) {
-            tempo.setText("Hai perso");
+            mostraImmagineFinale("immagini/hai_perso.png");
         } else {
             tempo.setText("Tempo rimasto: " + (--tempoRimasto));
         }
     }
+    private void mostraImmagineFinale(String percorsoImmagine) {
+        Image imgFinale = new Image(getClass().getResourceAsStream(percorsoImmagine));
+        immagineFinale = new ImageView(imgFinale);
+        immagineFinale.setFitWidth(WIDTH * CELL_SIZE);
+        immagineFinale.setFitHeight(HEIGHT * CELL_SIZE);
+        immagineFinale.setX(0);
+        immagineFinale.setY(0);
+
+      
+        giocatore.setVisible(false);
+        tempo.setVisible(false);
+
+        ((Pane) giocatore.getParent()).getChildren().add(immagineFinale);
+    }
+
 
     public static void main(String[] args) {
         launch(args);
