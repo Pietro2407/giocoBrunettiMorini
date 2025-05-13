@@ -26,6 +26,13 @@ public class Labirinto extends Application {
     private int yArrivo = 25;
     private ImageView immagineFinale;
 
+    private ImageView nemico1;
+    private int xNemico1 = 10, yNemico1 = 5;
+    private int direzionexNemico1 = 1;
+
+    private ImageView nemico2;
+    private int xNemico2 = 15, yNemico2 = 15;
+    private int direzionexNemico2 = -1;
 
     private int tempoRimasto = TIME_LIMIT;
     private Text tempo;
@@ -84,6 +91,27 @@ public class Labirinto extends Application {
         giocatore.setY(yGiocatore * CELL_SIZE);
         pannello.getChildren().add(giocatore);
 
+       
+        Image imgNemico1 = new Image(getClass().getResourceAsStream("immagini/nemico1.png"));
+        nemico1 = new ImageView(imgNemico1);
+        nemico1.setFitWidth(CELL_SIZE);
+        nemico1.setFitHeight(CELL_SIZE);
+        nemico1.setX(xNemico1 * CELL_SIZE);
+        nemico1.setY(yNemico1 * CELL_SIZE);
+        pannello.getChildren().add(nemico1);
+
+        
+        Image imgNemico2 = new Image(getClass().getResourceAsStream("immagini/nemico2.png"));
+        nemico2 = new ImageView(imgNemico2);
+        nemico2.setFitWidth(CELL_SIZE);
+        nemico2.setFitHeight(CELL_SIZE);
+        nemico2.setX(xNemico2 * CELL_SIZE);
+        nemico2.setY(yNemico2 * CELL_SIZE);
+        pannello.getChildren().add(nemico2);
+
+        Timeline movimentoNemici = new Timeline(new KeyFrame(Duration.millis(500), e -> muoviNemici()));
+        movimentoNemici.setCycleCount(Timeline.INDEFINITE);
+        movimentoNemici.play();
 
         final String[] direzione = {"giu"};
 
@@ -113,7 +141,6 @@ public class Labirinto extends Application {
                 giocatore.setX(xGiocatore * CELL_SIZE);
                 giocatore.setY(yGiocatore * CELL_SIZE);
 
-
                 int indicatore = switch (direzione[0]) {
                     case "destra" -> 6;
                     case "sinistra" -> 2;
@@ -134,27 +161,63 @@ public class Labirinto extends Application {
         stage.show();
     }
 
+    private void muoviNemici() {
+      
+        int nuovoX1 = xNemico1 + direzionexNemico1;
+        if (labirinto[yNemico1][nuovoX1] == 0) {
+            xNemico1 = nuovoX1;
+        } else {
+            direzionexNemico1 *= -1;
+           
+            if (yNemico1 + 1 < HEIGHT && labirinto[yNemico1 + 1][xNemico1] == 0) {
+                yNemico1++;
+            } else if (yNemico1 - 1 >= 0 && labirinto[yNemico1 - 1][xNemico1] == 0) {
+                yNemico1--;
+            }
+        }
+        nemico1.setX(xNemico1 * CELL_SIZE);
+        nemico1.setY(yNemico1 * CELL_SIZE);
+
+       
+        int nuovoX2 = xNemico2 + direzionexNemico2;
+        if (labirinto[yNemico2][nuovoX2] == 0) {
+            xNemico2 = nuovoX2;
+        } else {
+            direzionexNemico2 *= -1;
+            if (yNemico2 + 1 < HEIGHT && labirinto[yNemico2 + 1][xNemico2] == 0) {
+                yNemico2++;
+            } else if (yNemico2 - 1 >= 0 && labirinto[yNemico2 - 1][xNemico2] == 0) {
+                yNemico2--;
+            }
+        }
+        nemico2.setX(xNemico2 * CELL_SIZE);
+        nemico2.setY(yNemico2 * CELL_SIZE);
+
+
+        controllaCollisioni();
+    }
+    private void controllaCollisioni() {
+        if ((xGiocatore == xNemico1 && yGiocatore == yNemico1) ||
+            (xGiocatore == xNemico2 && yGiocatore == yNemico2)) {
+            mostraImmagineFinale("immagini/hai_perso.png");
+        }
+    }
+
+
+
     private void caricaLabirinto(Pane root) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                if (labirinto[y][x] == 1) {
-                    Image fotoPavimento = new Image(getClass().getResourceAsStream("immagini/pavimento.png"));
-                    ImageView pavimento = new ImageView(fotoPavimento);
-                    pavimento.setX(x * CELL_SIZE);
-                    pavimento.setY(y * CELL_SIZE);
-                    root.getChildren().add(pavimento);
-                } else {
-                    Image fotoMuro = new Image(getClass().getResourceAsStream("immagini/muro.png"));
-                    ImageView muro = new ImageView(fotoMuro);
-                    muro.setX(x * CELL_SIZE);
-                    muro.setY(y * CELL_SIZE);
-                    root.getChildren().add(muro);
-                }
+                Image img = new Image(getClass().getResourceAsStream("immagini/" + (labirinto[y][x] == 1 ? "pavimento" : "muro") + ".png"));
+                ImageView cella = new ImageView(img);
+                cella.setX(x * CELL_SIZE);
+                cella.setY(y * CELL_SIZE);
+                root.getChildren().add(cella);
             }
         }
 
-        Image fotoarrivo = new Image(getClass().getResourceAsStream("immagini/arrivo.png"));
-        ImageView arrivo = new ImageView(fotoarrivo);
+        Image fotoArrivo = new Image(getClass().getResourceAsStream("immagini/arrivo.png"));
+        ImageView arrivo = new ImageView(fotoArrivo);
         arrivo.setX(xArrivo * CELL_SIZE);
         arrivo.setY(yArrivo * CELL_SIZE);
         root.getChildren().add(arrivo);
@@ -167,15 +230,15 @@ public class Labirinto extends Application {
     }
 
     private void aggiornaTimer() {
-        if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
-        	return;
-        }
+        if (xGiocatore == xArrivo && yGiocatore == yArrivo) return;
+
         if (tempoRimasto <= 0) {
             mostraImmagineFinale("immagini/hai_perso.png");
         } else {
             tempo.setText("Tempo rimasto: " + (--tempoRimasto));
         }
     }
+
     private void mostraImmagineFinale(String percorsoImmagine) {
         Image imgFinale = new Image(getClass().getResourceAsStream(percorsoImmagine));
         immagineFinale = new ImageView(imgFinale);
@@ -184,13 +247,11 @@ public class Labirinto extends Application {
         immagineFinale.setX(0);
         immagineFinale.setY(0);
 
-      
         giocatore.setVisible(false);
         tempo.setVisible(false);
 
         ((Pane) giocatore.getParent()).getChildren().add(immagineFinale);
     }
-
 
     public static void main(String[] args) {
         launch(args);
