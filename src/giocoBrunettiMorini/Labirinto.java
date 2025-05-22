@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -17,7 +18,7 @@ public class Labirinto extends Application {
     private static final int CELL_SIZE = 32;
     private static final int WIDTH = 30;
     private static final int HEIGHT = 27;
-    private static final int TIME_LIMIT = 45;
+    private static final int TIME_LIMIT = 60;
 
     private ImageView giocatore;
     private int xGiocatore = 1;
@@ -154,6 +155,7 @@ public class Labirinto extends Application {
                 vittoria();
             }
         });
+        
 
         stage.setScene(scene);
         stage.setTitle("Labirinto");
@@ -231,6 +233,7 @@ public class Labirinto extends Application {
     private void vittoria() {
         if (xGiocatore == xArrivo && yGiocatore == yArrivo) {
             mostraImmagineFinale("immagini/hai_vinto.png");
+            
         }
     }
 
@@ -251,6 +254,9 @@ public class Labirinto extends Application {
         immagineFinale.setFitHeight(HEIGHT * CELL_SIZE);
         immagineFinale.setX(0);
         immagineFinale.setY(0);
+        Button prossimoLivello = new Button("Prossimo livello");
+        prossimoLivello.setLayoutY(HEIGHT * CELL_SIZE + 30);
+        prossimoLivello.setLayoutX(HEIGHT * CELL_SIZE -60);
 
         giocatore.setVisible(false);
         tempo.setVisible(false);
